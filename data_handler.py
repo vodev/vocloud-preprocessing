@@ -22,6 +22,13 @@ def process_set(uris, normalize=True, binning=True, delimiter=','):
 def load_set(uri, format='csv', header=False, delimiter=','):
     return pd.read_csv(uri, header=0 if header else None, sep=None, dtype=None, na_values='?', skipinitialspace=True)
 
+def to_dataframe(spectra_list):
+    index = [spectrum['id'] for spectrum in spectra_list]
+    columns = spectra_list[0]['header']
+    data = [spectrum['data'] for spectrum in spectra_list]
+    df = pd.DataFrame(data=data, columns=columns, index=index)
+    return df
+
 def _to_array(fits_list):
     for fits in fits_list:
         data = fits['data']
@@ -87,7 +94,7 @@ def _normalize(fits_list):
     '''normalize data'''
     min_max_scaler = preprocessing.MinMaxScaler()
     data_list = [fits['data'] for fits in fits_list]
-    preprocessed_data = min_max_scaler.fit_transform(data_list)
+    preprocessed_data = preprocessing.normalize(data_list, norm='l2')
     for idx, item in enumerate(preprocessed_data):
         fits_list[idx]['data'] = item
 
@@ -131,7 +138,7 @@ def _parse_all_fits(uri):
                     continue
                 fits = {}
                 fits['data'] = fits_data
-                fits['id'] = fi
+                fits['id'] = fi[0:-5]
                 fits['class'] = current_class
                 #pprint.pprint(fits[-1])
 
