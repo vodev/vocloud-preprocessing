@@ -1,23 +1,26 @@
 import pyfits
 import pandas as pd
 import numpy as np
-from sklearn.cross_validation import train_test_split
+from sklearn.cross_validation import StratifiedShuffleSplit
 from sklearn.cross_validation import StratifiedKFold, KFold
 import sklearn.preprocessing as preprocessing
 import os
 import io
 from pprint import pprint
 
-def process_set(uris, normalize=True, binning=True, delimiter=','):
-    all_fits = _parse_all_fits(uris)
+def load_spectra_from_fits(uri):
+    all_fits = _parse_all_fits(uri)
     all_fits = _to_array(all_fits)
-    if(binning):
-        all_fits = _binning(all_fits)
-    if normalize:
-        _normalize(all_fits)
-    #csv_name = 'processed.csv'
-    #_write_fits_csv(all_fits, csv_name)
     return all_fits
+
+def process_set(spectra, normalize=True, binning=True, delimiter=','):
+    if(binning):
+        spectra = _binning(spectra)
+    if normalize:
+        _normalize(spectra)
+    #csv_name = 'processed.csv'
+    #_write_fits_csv(spectra, csv_name)
+    return spectra
 
 def load_set(uri, format='csv', header=False, delimiter=','):
     return pd.read_csv(uri, header=0 if header else None, sep=None, dtype=None, na_values='?', skipinitialspace=True)
@@ -25,8 +28,11 @@ def load_set(uri, format='csv', header=False, delimiter=','):
 def to_dataframe(spectra_list):
     index = [spectrum['id'] for spectrum in spectra_list]
     columns = spectra_list[0]['header']
+    #columns.append('label')
     data = [spectrum['data'] for spectrum in spectra_list]
+    classes = [spectrum['class'] for spectrum in spectra_list]
     df = pd.DataFrame(data=data, columns=columns, index=index)
+    df.insert(len(df.columns), 'class', classes)
     return df
 
 def _to_array(fits_list):
@@ -181,3 +187,13 @@ def _parse_fits(uri):
     dat = fits[1].data
     fits.close()
     return dat.tolist()
+
+def split_train_set(data_frame, ratio=0.67):
+    classes = data_frame['class'].as_matrix()
+    indices = StratifiedShuffleSplit(classes, test_size = 1 / 3, n_iter=1)
+    train_set = None
+    test_set = None
+    for train, test in indices:
+        train_set = data_frame.iloc[train]
+        test_set = data_frame.iloc[test]
+    return train_set, test_set
