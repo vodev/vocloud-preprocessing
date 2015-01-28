@@ -2,7 +2,6 @@ import os
 import io
 import random
 import itertools
-
 import pyfits
 import pandas as pd
 from sklearn.cross_validation import StratifiedShuffleSplit
@@ -140,7 +139,7 @@ def _parse_all_fits(uri):
     parsed_fits = []
     classes = None
     current_class = None
-    features = 1997
+    #features = 1997
     for root, dirs, files in os.walk(uri):
         base = os.path.basename(root)
         # print(base)
@@ -164,12 +163,9 @@ def _parse_all_fits(uri):
             #        parsed_fits.append(fits)
             fi = fits_files[idx]
             fits_data = _parse_fits(os.path.join(root, fi))
-            if (len(fits_data) != features):
-                continue
-            fits = {}
-            fits['data'] = fits_data
-            fits['id'] = fi[0:-5]
-            fits['class'] = current_class
+            if len(fits_data) != 1997:
+                print(fi)
+            fits = {'data': fits_data, 'id': fi[0:-5], 'class': current_class}
             #pprint.pprint(fits[-1])
             parsed_fits.append(fits)
     # pprint.pprint(parsed_fits)
