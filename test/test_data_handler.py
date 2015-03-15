@@ -29,4 +29,4 @@ class TestProcessSet(TestCase):
         for spectrum in spectra:
             lengths.add(len(spectrum['header']))
             self.assertEqual(len(lengths), 1, 'Headers don\'t have equal size')
-        
+
