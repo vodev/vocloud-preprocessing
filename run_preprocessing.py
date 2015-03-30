@@ -1,4 +1,5 @@
 import sys
+import os
 import json
 import base.data_handler as dh
 def main():
@@ -40,7 +41,11 @@ def run_preprocessing(input_file):
                                     iterations=decompose_dict['iterations'] if
                                     'iterations' in decompose_dict else 300,
                                     kind=decompose_dict['kind'])
-    processed_df.to_csv(json_dict['out_file'], header=True, index=True, index_label='id')
+    try:
+        os.mkdir("./out")
+    except:
+        pass
+    processed_df.to_csv("./out/" + json_dict['out_file'], header=True, index=True, index_label='id')
 
 if __name__ == '__main__':
     main()
