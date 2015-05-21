@@ -12,9 +12,7 @@ import matplotlib.pyplot as plt
 
 
 def load_spectra_from_fits(uri):
-    all_fits = _parse_all_fits(uri)
-    all_fits = _to_array(all_fits)
-    return all_fits
+    return _to_array(_parse_all_fits(uri))
 
 
 def process_set(spectra, normalize=True, binning=True, remove_duplicates=True, delimiter=','):
@@ -33,14 +31,15 @@ def load_set(uri, format='csv', header=False, delimiter=','):
                        skipinitialspace=True)
 
 
-def to_dataframe(spectra_list):
-    index = [spectrum['id'] for spectrum in spectra_list]
+def to_dataframe(spectra_list, class_dict=None):
+    indices = [spectrum['id'] for spectrum in spectra_list]
     columns = spectra_list[0]['header']
     # columns.append('label')
     data = [spectrum['data'] for spectrum in spectra_list]
-    classes = [spectrum['class'] for spectrum in spectra_list]
-    spectra_df = pd.DataFrame(data=data, columns=columns, index=index)
-    spectra_df.insert(len(spectra_df.columns), 'class', classes)
+    spectra_df = pd.DataFrame(data=data, columns=columns, index=indices)
+    if class_dict is not None:
+        classes = [class_dict[index] for index in indices]
+        spectra_df.insert(len(spectra_df.columns), 'class', classes)
     return spectra_df
 
 
@@ -58,26 +57,33 @@ def _to_array(fits_list):
 
 
 def _binning(fits_list):
-    '''do data binning'''
-    result = []
-    # pprint(fits_list)
-    #pprint(fits_list[0])
-    #pprint(fits_list[0]['data'][0])
+    '''Bin the incoming data (expecting two columns [wavelength, intensity]) based on the difference
+    between two subsequent points. If the difference between avg of current bin and current point
+    exceeds 0.25 we will start new bin
 
+    Note that fits['header'] is array of wavelengths and fits['data'] is array of intensities which
+    conforms to the wavelengths.
+    '''
+
+    result = []
+
+    # setup min, max wavelengths from a sample FITS file (the first one)
     first_min = fits_list[0]['header'][0]
     first_max = fits_list[0]['header'][0]
     last_min = fits_list[0]['header'][-1]
     last_max = fits_list[0]['header'][-1]
 
+    # find global min, max of wavelengths
     for fits in fits_list:
         first_min = min(fits['header'][0], first_min)
         first_max = max(fits['header'][0], first_max)
         last_min = min(fits['header'][-1], last_min)
         last_max = max(fits['header'][-1], last_max)
+
+
     first_avg = first_max
     last_avg = last_min
     diff = 0.25
-    #print((first_min + first_max) / 2, (last_min + last_max) / 2)
     for fits in fits_list:
         fits_data = fits['data']
         fits_header = fits['header']
@@ -87,6 +93,7 @@ def _binning(fits_list):
         it = 0
         columns = 0
         while current_val <= last_avg:
+            # find the common spectral length to crop all spectra on it
             while fits_header[it] > current_val or fits_header[it + 1] < current_val:
                 it += 1
             diff_x = fits_header[it + 1] - fits_header[it]
@@ -100,7 +107,6 @@ def _binning(fits_list):
         binned_dictionary = {}
         binned_dictionary['data'] = binned_data
         binned_dictionary['id'] = fits['id']
-        binned_dictionary['class'] = fits['class']
         binned_dictionary['header'] = binned_header
         result.append(binned_dictionary)
     return result
@@ -141,33 +147,16 @@ def _parse_all_fits(uri):
     current_class = None
     #features = 1997
     for root, dirs, files in os.walk(uri):
-        base = os.path.basename(root)
-        # print(base)
-        if (root == uri):
-            classes = dirs
-        elif (base in classes):
-            current_class = base
         fits_files = [file for file in files if file.endswith('.fits')]
-        if len(fits_files) > 0:
-            idx = random.randint(0, len(fits_files) - 1)
-            #for fi in enumerate(files):
-            #    if idx == fi.endswith('.fits'):
-            #        fits_data = _parse_fits(os.path.join(root, fi))
-            #        if(len(fits_data) != features):
-            #            continue
-            #        fits = {}
-            #        fits['data'] = fits_data
-            #        fits['id'] = fi[0:-5]
-            #        fits['class'] = current_class
-            #        #pprint.pprint(fits[-1])
-            #        parsed_fits.append(fits)
-            fi = fits_files[idx]
-            fits_data = _parse_fits(os.path.join(root, fi))
-            if len(fits_data) != 1997:
-                print(fi)
-            fits = {'data': fits_data, 'id': fi[0:-5], 'class': current_class}
-            #pprint.pprint(fits[-1])
-            parsed_fits.append(fits)
+        if len(fits_files) > 0: continue
+        for fits_file in fits_files:
+            try:
+                fits = {}
+                fits["data"] = _parse_fits(os.path.join(root, fits_file))
+                fits["id"] = os.path.splitext(fits_file)[0]
+                parsed_fits.append(fits)
+            except:
+                print(str(e) + "for :" + str(fits_file))
     # pprint.pprint(parsed_fits)
     return parsed_fits
 
