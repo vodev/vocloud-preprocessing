@@ -1,9 +1,4 @@
-Data Preprocessing Worker for VO-cloud
-######################################
-
-:author: Andrej Palicka
-:license: MIT
-
+# Data Preprocessing Worker for VO-cloud
 
 The application works as a plugin of vo-cloud data mining application. The main purpose is to
 transform FITS files into generaly readable format - CSV.
@@ -24,6 +19,6 @@ It can perform many transformations which are described by //config.json//
 
 'binning' -- bins the intenzities based on their difference between the followings
 
-'remove_duplicates' --
+'remove_duplicates' -- TODO
 
-'select_features' -- in json_dict:
+'select_features' -- TODO
