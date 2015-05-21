@@ -120,26 +120,6 @@ def _normalize(fits_list, norm='l2'):
         fits_list[idx]['data'] = item
 
 
-def _write_fits_csv(fits_list, name):
-    csv_file = io.open(name, mode='w', encoding="utf-8")
-    csv_file.write('id,')
-    for record in fits_list[0]['data']:
-        csv_file.write(str(record[0]))
-        csv_file.write(',')
-    csv_file.write('class\n')
-    for fits in fits_list:
-        # print(fits)
-        csv_file.write(fits['id'])
-        csv_file.write(',')
-        for record in fits['data']:
-            #print(str(record[1]))
-            csv_file.write(str(record[1]))
-            csv_file.write(',')
-        csv_file.write(fits['class'])
-        csv_file.write('\n')
-    csv_file.close()
-
-
 def _parse_all_fits(uri):
     parsed_fits = []
     classes = None

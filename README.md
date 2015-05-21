@@ -1,9 +1,9 @@
 # Data Preprocessing Worker for VO-cloud
 
 The application works as a plugin of vo-cloud data mining application. The main purpose is to
-transform FITS files into generaly readable format - CSV.
+transform all FITS files from current working into generaly readable format - CSV.
 
-It can perform many transformations which are described by //config.json//
+It can perform many transformations which are described by `config.json`
 
 'classes_file' -- file with classes assigned to (FITS) data files in form of JSON as
 
