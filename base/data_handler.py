@@ -45,13 +45,12 @@ def to_dataframe(spectra_list, class_dict=None):
 
 def _to_array(fits_list):
     for fits in fits_list:
-        data = fits['data']
-        arr = []
+        data = []
         header = []
-        for length, intensity in data:
-            arr.append(intensity)
+        for length, intensity in fits['data']:
+            data.append(intensity)
             header.append(length)
-        fits['data'] = arr
+        fits['data'] = data
         fits['header'] = header
     return fits_list
 
@@ -148,6 +147,7 @@ def _parse_all_fits(uri):
     #features = 1997
     for root, dirs, files in os.walk(uri):
         fits_files = [file for file in files if file.endswith('.fits')]
+        print(fits_files)
         if len(fits_files) > 0: continue
         for fits_file in fits_files:
             try:
