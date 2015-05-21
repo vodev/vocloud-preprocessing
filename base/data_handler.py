@@ -147,8 +147,7 @@ def _parse_all_fits(uri):
     #features = 1997
     for root, dirs, files in os.walk(uri):
         fits_files = [file for file in files if file.endswith('.fits')]
-        print(fits_files)
-        if len(fits_files) > 0: continue
+        if len(fits_files) == 0: continue
         for fits_file in fits_files:
             try:
                 fits = {}
