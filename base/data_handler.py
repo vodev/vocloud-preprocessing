@@ -9,7 +9,7 @@ from sklearn.decomposition import PCA, KernelPCA, FastICA
 import sklearn.preprocessing as preprocessing
 import sklearn.feature_selection as feature_selection
 import matplotlib.pyplot as plt
-
+import numpy as np
 
 def load_spectra_from_fits(uri):
     return _to_array(_parse_all_fits(uri))
@@ -17,7 +17,7 @@ def load_spectra_from_fits(uri):
 
 def process_set(spectra, normalize=True, binning=True, remove_duplicates=True, delimiter=','):
     if binning:
-        spectra = _binning(spectra)
+        spectra = __spectra_rebinning(spectra)
     if normalize:
         _normalize(spectra)
     # csv_name = 'processed.csv'
@@ -72,6 +72,7 @@ def __spectra_rebinning(fits_list):
     start = min(firsts)
     stop = max(lasts)
     binned_header = np.linspace(start, stop, len(fits_list[0]['header']))
+    print(binned_header)
     #print((first_min + first_max) / 2, (last_min + last_max) / 2)
     for fits in fits_list:
         fits_data = fits['data']
@@ -93,9 +94,6 @@ def _normalize(fits_list, norm='l2'):
 
 def _parse_all_fits(uri):
     parsed_fits = []
-    classes = None
-    current_class = None
-    #features = 1997
     for root, dirs, files in os.walk(uri):
         fits_files = [file for file in files if file.endswith('.fits')]
         if len(fits_files) == 0: continue
@@ -108,35 +106,8 @@ def _parse_all_fits(uri):
             except:
                 print(str(e) + "for :" + str(fits_file))
     # pprint.pprint(parsed_fits)
+
     return parsed_fits
-
-
-def _write_csv(data, uri, header=None, separator=',', dtypes=None):
-    with io.open(uri, 'w', encoding='utf-8') as out:
-        if header is not None or False:
-            print("writing header")
-            for record in header:
-                try:
-                    out.write(str(record))
-                except TypeError:
-                    out.write(unicode(str(record)))
-                if (record != header[-1]):
-                    out.write(separator)
-            out.write('\n')
-
-        for row in data:
-            rec_num = 0
-            for record in row:
-                val = record
-                if (dtypes is not None and 'int' in str(dtypes[rec_num])):
-                    val = int(val)
-                elif (dtypes is not None and 'float' in str(dtypes[rec_num])):
-                    val = float(val)
-                out.write(str(val))
-                if (rec_num != len(row) - 1):
-                    out.write(separator)
-                rec_num += 1
-            out.write('\n')
 
 
 def _parse_fits(uri):
