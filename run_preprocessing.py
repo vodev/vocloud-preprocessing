@@ -1,5 +1,4 @@
 import sys
-import os
 import json
 import base.data_handler as dh
 
@@ -45,6 +44,10 @@ def run_preprocessing(input_file):
                                     iterations=decompose_dict['iterations'] if
                                     'iterations' in decompose_dict else 300,
                                     kind=decompose_dict['kind'])
+    if 'som_format' in json_dict and json_dict['som_format']:
+        processed_df['id'].to_csv("./names.txt", header=False, index=False)
+        processed_df['class'].to_csv("./classes.txt", header=False, index=False)
+        processed_df.drop(['id', 'class']).to_csv("./" + json_dict['out_file'] + "_som.csv", header=False, index=False)
     processed_df.to_csv("./" + json_dict['out_file'], header=True, index=True, index_label='id')
 
 
