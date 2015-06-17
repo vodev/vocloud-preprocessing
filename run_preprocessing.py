@@ -2,7 +2,9 @@ import sys
 import json
 import string
 import base.data_handler as dh
+import os
 __LINK_TEMPLATE = string.Template('<option id="${spectrum_name}_link">${spectrum_name}</option>\n')
+__script_dir = os.path.dirname(os.path.realpath(__file__))
 
 
 def main():
@@ -13,7 +15,7 @@ def main():
 
 
 def _generate_spectra(spectra):
-    with open("spectra_list.html.template") as template_file:
+    with open(__script_dir + "/spectra_list.html.template") as template_file:
         html_template = string.Template(template_file.read())
     spectra_list = []
     for index, spectrum in spectra.iterrows():

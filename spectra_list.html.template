@@ -98,8 +98,8 @@
 <script src="https://code.highcharts.com/modules/heatmap.js"></script>
 <script src="https://code.highcharts.com/modules/exporting.js"></script>
       <h1>Spectra</h1>
-    <form style="height: 200px" id="spectra_list">
-        <select name="spectra" multiple>
+    <form  id="spectra_list">
+        <select style="height: 200px" name="spectra" multiple>
                 ${list}
         </select>
     </form>

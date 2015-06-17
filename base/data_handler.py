@@ -64,47 +64,23 @@ def __spectra_rebinning(fits_list):
     conforms to the wavelengths.
     '''
     result = []
-       # setup min, max wavelengths from a sample FITS file (the first one)
-    first_min = fits_list[0]['header'][0]
-    first_max = fits_list[0]['header'][0]
-    last_min = fits_list[0]['header'][-1]
-    last_max = fits_list[0]['header'][-1]
-
-    # find global min, max of wavelengths
-    for fits in fits_list:
-        first_min = min(fits['header'][0], first_min)
-        first_max = max(fits['header'][0], first_max)
-        last_min = min(fits['header'][-1], last_min)
-        last_max = max(fits['header'][-1], last_max)
-
-
-    first_avg = first_max
-    last_avg = last_min
-    diff = 0.25
+    # pprint(fits_list)
+    #pprint(fits_list[0])
+    #pprint(fits_list[0]['data'][0])
+    firsts = [x['header'][0] for x in fits_list]
+    lasts = [x['header'][-1] for x in fits_list]
+    start = max(firsts)
+    stop = min(lasts)
+    binned_header = np.linspace(start, stop, 1980)
+    #print((first_min + first_max) / 2, (last_min + last_max) / 2)
     for fits in fits_list:
         fits_data = fits['data']
         fits_header = fits['header']
-        binned_data = []
-        binned_header = []
-        current_val = first_avg
-        it = 0
-        columns = 0
-        while current_val <= last_avg:
-            # find the common spectral length to crop all spectra on it
-            while fits_header[it] > current_val or fits_header[it + 1] < current_val:
-                it += 1
-            diff_x = fits_header[it + 1] - fits_header[it]
-            diff_y = fits_data[it] - fits_data[it + 1]
-            diff_x_val = current_val - fits_header[it]
-            div = diff_x_val / diff_x
-            binned_header.append(current_val)
-            binned_data.append(fits_data[it] - diff_y * div)
-            current_val += diff
-            columns += 1
-        binned_dictionary = {}
-        binned_dictionary['data'] = binned_data
-        binned_dictionary['id'] = fits['id']
-        binned_dictionary['header'] = binned_header
+        indexes = [idx for idx,x in enumerate(fits_header) if start <= x <= stop]
+        fits_header = [fits_header[idx] for idx in indexes]
+        fits_data = [fits_data[idx] for idx in indexes]
+        binned_data = np.interp(binned_header, xp=fits_header, fp=fits_data)
+        binned_dictionary = {'data': binned_data, 'id': fits['id'], 'header': binned_header}
         result.append(binned_dictionary)
     return result
 
