@@ -37,7 +37,7 @@ def to_dataframe(spectra_list, class_dict=None):
     # columns.append('label')
     data = [spectrum['data'] for spectrum in spectra_list]
     spectra_df = pd.DataFrame(data=data, columns=columns, index=indices)
-    if class_dict is not None:
+    if len(class_dict) > 0:
         classes = [class_dict[index] for index in indices]
         spectra_df.insert(len(spectra_df.columns), 'class', classes)
     return spectra_df
