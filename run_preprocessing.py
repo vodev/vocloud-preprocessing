@@ -26,7 +26,10 @@ def _generate_spectra(spectra):
 
     html_code = html_template.substitute(
         {"list": "".join(spectra_list),"cats": categories})
-    spectra.drop("class", axis=1).to_csv("spectra.txt", header=False, index=False, sep=",")
+    try:
+        spectra.drop("class", axis=1).to_csv("spectra.txt", header=False, index=False, sep=",")
+    except ValueError:
+        spectra.to_csv("spectra.txt", header=False, index=False, sep=",")
     return html_code
 
 def run_preprocessing(input_file):
