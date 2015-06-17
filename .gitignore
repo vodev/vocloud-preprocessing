@@ -63,3 +63,4 @@ plots/
 *sublime*
 config.json
 archive_1_5
+*.json
