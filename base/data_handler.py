@@ -69,10 +69,9 @@ def __spectra_rebinning(fits_list):
     #pprint(fits_list[0]['data'][0])
     firsts = [x['header'][0] for x in fits_list]
     lasts = [x['header'][-1] for x in fits_list]
-    start = min(firsts)
-    stop = max(lasts)
+    start = max(firsts)
+    stop = min(lasts)
     binned_header = np.linspace(start, stop, len(fits_list[0]['header']))
-    print(binned_header)
     #print((first_min + first_max) / 2, (last_min + last_max) / 2)
     for fits in fits_list:
         fits_data = fits['data']

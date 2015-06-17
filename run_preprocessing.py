@@ -45,12 +45,12 @@ def run_preprocessing(input_file):
                                     'iterations' in decompose_dict else 300,
                                     kind=decompose_dict['kind'])
     if 'som_format' in json_dict and json_dict['som_format']:
-        processed_df['id'].index.toseries().to_csv("./names.txt", header=False, index=False)
+        processed_df['id'].index.to_series().to_csv("./names.txt", header=False, index=False)
         try:
             processed_df['class'].to_csv("./classes.txt", header=False, index=False)
+            processed_df.drop(['class']).to_csv("./som.csv", header=False, index=False, sep=" ")
         except KeyError:
-            pass
-        processed_df.drop(['id', 'class']).to_csv("./som.csv", header=False, index=False)
+            processed_df.to_csv("./som.csv", header=False, index=False, sep=" ")
     processed_df.to_csv("./" + json_dict['out_file'], header=True, index=True, index_label='id')
 
 
