@@ -76,7 +76,7 @@ def run_preprocessing(input_file):
     processed_df.to_csv("./" + json_dict['out_file'], header=True, index=True, index_label='id')
 
     html_code = _generate_spectra(processed_df)
-    with open("index.html", "w") as file:
+    with open("./index.html", "w") as file:
         file.write(html_code)
 
 if __name__ == '__main__':
