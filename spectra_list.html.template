@@ -10,6 +10,7 @@
     <script type="text/javascript">
         var options = null;
         var series = [];
+        var chart;
     $$(function() {
         options = {
 
@@ -50,38 +51,37 @@
             },
             series: []
         };
-        var chart = new Highcharts.Chart(options);
+        chart = new Highcharts.Chart(options);
         $$.ajax("spectra.txt", {
             success: function (data) {
-                rows = data.split("\n");
-                for (row in rows) {
-                    points = rows[row].split(",");
-                    pointsFloat = []
-                    for (idx in points) {
+                var rows = data.split("\n");
+                for (var row in rows) {
+                    var points = rows[row].split(",");
+                    var pointsFloat = [];
+                    for (var idx in points) {
                         pointsFloat.push(parseFloat(points[idx]))
                     }
                     series.push(pointsFloat)
                 }
-                options.series = series
-
+                options.series = series;
+                //show graph by default
+                showSpectra($$('#spectra_list option'));
+                console.log("shown");
             }
-        })
+        })         
     });
-        function reloadSpectra()
-        {
-            console.log("reloading")
-            var selected = $$('#spectra_list').find(":selected");
-            var selectedNames =[]
-            var selectedIndex =[]
-            for(opt in selected.toArray())
+        function showSpectra(selected){
+            var selectedNames =[];
+            var selectedIndex =[];
+            for(var opt in selected.toArray())
             {
-                selectedIndex.push(selected[opt].index)
-                selectedNames.push(selected[opt].text)
+                selectedIndex.push(selected[opt].index);
+                selectedNames.push(selected[opt].text);
             }
             var chart_data = [];
-            for(idx in series)
+            for(var idx in series)
             {
-                indexInSelected = selectedIndex.indexOf(parseInt(idx));
+                var indexInSelected = selectedIndex.indexOf(parseInt(idx));
                 if(indexInSelected != -1)
                 {
 
@@ -89,7 +89,13 @@
                 }
             }
             options.series = chart_data;
-            chart = new Highcharts.Chart(options);
+            chart = new Highcharts.Chart(options);        
+        }
+        function reloadSpectra()
+        {
+            console.log("reloading")
+            var selected = $$('#spectra_list').find(":selected");
+            showSpectra(selected);
         }
     </script>
   </head>
@@ -99,11 +105,11 @@
 <script src="https://code.highcharts.com/modules/exporting.js"></script>
       <h1>Spectra</h1>
     <form  id="spectra_list">
-        <select style="height: 200px" name="spectra" multiple>
+        <select style="height: 200px;min-width:100%" name="spectra" multiple>
                 ${list}
         </select>
     </form>
-   <button onclick="reloadSpectra()">Load</button>
+   <button onclick="reloadSpectra()" style="font-size: 120%;margin: 20px;width:100px">Load</button>
 
     <div id="plot" style="height: 400px; min-width: 310px; margin: 0 auto"></div>
 </body>
