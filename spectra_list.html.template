@@ -10,7 +10,7 @@
     <script type="text/javascript">
         var options = null;
         var series = [];
-        var chart;
+        var chart = null;
     $$(function() {
         $$.ajax("spectra.txt", {
             success: function (data) {
@@ -46,8 +46,8 @@
             }
             if !chart
             {
-                chart = new Dygraph(document.getElementById("plot"), [], {
-                labels: []],
+                chart = new Dygraph(document.getElementById("plot"), chart_data, {
+                labels: selectedNames],
                 animatedZooms: true
                 });
             }
