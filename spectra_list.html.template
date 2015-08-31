@@ -1,0 +1,107 @@
+<!DOCTYPE HTML>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Spectra</title>
+
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
+    <style type="text/css">
+
+    </style>
+    <script type="text/javascript">
+        var options = null;
+        var series = [];
+        var chart = null;
+    $$(function() {
+        $$.ajax("spectra.txt", {
+            success: function (data) {
+                var rows = data.split("\n");
+                for (var row in rows) {
+                    var points = rows[row].split(",");
+                    var pointsFloat = [];
+                    for (var idx in points) {
+                        pointsFloat.push(parseFloat(points[idx]))
+                    }
+                    series.push(pointsFloat)
+                }
+                showSpectra($$('#spectra_list option'));
+            }
+        })
+    });
+        function range(low, high)
+        {
+            var range = [];
+            while(low < high)
+            {
+                range.push(low++);
+            }
+            return range;
+        }
+
+        function transpose(matrix)
+        {
+            return matrix[0].map(function(col, i) {
+                return matrix.map(function(row) {
+                        return row[i]
+                })
+            });
+        }
+
+        function showSpectra(selected){
+            var selectedNames = ["length"];
+            var selectedIndex = [];
+            for(var opt in selected.toArray())
+            {
+                selectedIndex.push(selected[opt].index);
+                selectedNames.push(selected[opt].text);
+            }
+            var chartData = [];
+            first_row = ${cats};
+            chartData.push(first_row);
+            for(var idx in series)
+            {
+                var indexInSelected = selectedIndex.indexOf(parseInt(idx));
+                if(indexInSelected != -1)
+                {
+
+                    chartData.push(series[idx]);
+                }
+            }
+            chartData = transpose(chartData);
+            if(!chart)
+            {
+                chart = new Dygraph(document.getElementById("plot"), chartData, {
+                labels: selectedNames,
+                animatedZooms: true
+                });
+            }
+            else
+            {
+                chart.updateOptions({"file": chartData, "labels": selectedNames });
+            }
+        }
+
+        function reloadSpectra()
+        {
+            console.log("reloading")
+            var selected = $$('#spectra_list').find(":selected");
+            showSpectra(selected);
+        }
+    </script>
+  </head>
+<body>
+<script src="https://code.highcharts.com/highcharts.js"></script>
+<script src="https://code.highcharts.com/modules/heatmap.js"></script>
+<script src="https://code.highcharts.com/modules/exporting.js"></script>
+<script src="http://cdnjs.cloudflare.com/ajax/libs/dygraph/1.1.1/dygraph-combined.js"></script>
+
+      <h1>Spectra</h1>
+    <form  id="spectra_list">
+        <select style="height: 200px;min-width:100%" name="spectra" multiple>
+                ${list}
+        </select>
+    </form>
+   <button onclick="reloadSpectra()" style="font-size: 120%;margin: 20px;width:100px">Load</button>
+
+    <div id="plot" style="height: 400px; min-width: 310px; margin: 0 auto"></div>
+</body>
+</html>

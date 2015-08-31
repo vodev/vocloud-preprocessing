@@ -1,7 +1,10 @@
 import sys
-import os
 import json
+import string
 import base.data_handler as dh
+import os
+__LINK_TEMPLATE = string.Template('<option selected id="${spectrum_name}_link">${spectrum_name}</option>\n')
+__script_dir = os.path.dirname(os.path.realpath(__file__))
 
 
 def main():
@@ -10,6 +13,24 @@ def main():
     for file in sys.argv[1:]:
         run_preprocessing(file)
 
+
+def _generate_spectra(spectra):
+    with open(__script_dir + "/spectra_list.html.template") as template_file:
+        html_template = string.Template(template_file.read())
+    spectra_list = []
+    for index, spectrum in spectra.iterrows():
+        spectrum_link = __LINK_TEMPLATE.substitute({'spectrum_name': str(index),
+                                                    'spectrum_name_short': str(index)})
+        spectra_list.append(spectrum_link)
+    categories = json.dumps(spectra.columns.values.tolist())
+
+    html_code = html_template.substitute(
+        {"list": "".join(spectra_list),"cats": categories})
+    try:
+        spectra.drop("class", axis=1).to_csv("spectra.txt", header=False, index=False, sep=",")
+    except ValueError:
+        spectra.to_csv("spectra.txt", header=False, index=False, sep=",")
+    return html_code
 
 def run_preprocessing(input_file):
     json_dict = None
@@ -45,8 +66,18 @@ def run_preprocessing(input_file):
                                     iterations=decompose_dict['iterations'] if
                                     'iterations' in decompose_dict else 300,
                                     kind=decompose_dict['kind'])
+    if 'som_format' in json_dict and json_dict['som_format']:
+        processed_df.index.to_series().to_csv("./names.txt", header=False, index=False)
+        try:
+            processed_df['class'].to_csv("./classes.txt", header=False, index=False)
+            processed_df.drop(['class'], axis=1).to_csv("./som.csv", header=False, index=False, sep=" ")
+        except KeyError:
+            processed_df.to_csv("./som.csv", header=False, index=False, sep=" ")
     processed_df.to_csv("./" + json_dict['out_file'], header=True, index=True, index_label='id')
 
+    html_code = _generate_spectra(processed_df)
+    with open("./index.html", "w") as file:
+        file.write(html_code)
 
 if __name__ == '__main__':
     main()
