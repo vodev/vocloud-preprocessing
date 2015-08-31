@@ -19,7 +19,11 @@
                     var points = rows[row].split(",");
                     var pointsFloat = [];
                     for (var idx in points) {
-                        pointsFloat.push(parseFloat(points[idx]))
+                        var num = points[idx];
+                        if(isFinite(num))
+                        {
+                            pointsFloat.push(parseFloat())
+                        }
                     }
                     series.push(pointsFloat)
                 }
