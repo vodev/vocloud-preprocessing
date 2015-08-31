@@ -23,37 +23,60 @@
                     }
                     series.push(pointsFloat)
                 }
+                showSpectra($$('#spectra_list option'));
             }
         })
     });
+        function range(low, high)
+        {
+            var range = [];
+            while(low < high)
+            {
+                range.push(low++);
+            }
+            return range;
+        }
+
+        function transpose(matrix)
+        {
+            return matrix[0].map(function(col, i) {
+                return matrix.map(function(row) {
+                        return row[i]
+                })
+            });
+        }
+
         function showSpectra(selected){
-            var selectedNames =[];
-            var selectedIndex =[];
+            var selectedNames = ["length"];
+            var selectedIndex = [];
             for(var opt in selected.toArray())
             {
                 selectedIndex.push(selected[opt].index);
                 selectedNames.push(selected[opt].text);
             }
-            var chart_data = [];
+            var chartData = [];
+            first_row = ${cats};
+            chartData.push(first_row);
             for(var idx in series)
             {
                 var indexInSelected = selectedIndex.indexOf(parseInt(idx));
                 if(indexInSelected != -1)
                 {
 
-                    chart_data.push(series[idx]);
+                    chartData.push(series[idx]);
                 }
             }
-            if !chart
+            chartData = transpose(chartData);
+            if(!chart)
             {
-                chart = new Dygraph(document.getElementById("plot"), chart_data, {
+                chart = new Dygraph(document.getElementById("plot"), chartData, {
                 labels: selectedNames],
                 animatedZooms: true
                 });
             }
             else
             {
-                chart.updateOptions({"file": chart_data, "labels": selectedNames });
+                chart.updateOptions({"file": chartData, "labels": selectedNames });
             }
         }
 
