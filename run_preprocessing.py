@@ -3,7 +3,7 @@ import json
 import string
 import base.data_handler as dh
 import os
-__LINK_TEMPLATE = string.Template('<option id="${spectrum_name}_link">${spectrum_name}</option>\n')
+__LINK_TEMPLATE = string.Template('<option selected id="${spectrum_name}_link">${spectrum_name}</option>\n')
 __script_dir = os.path.dirname(os.path.realpath(__file__))
 
 
