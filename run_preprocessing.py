@@ -23,9 +23,12 @@ def _generate_spectra(spectra):
                                                     'spectrum_name_short': str(index)})
         spectra_list.append(spectrum_link)
     categories = json.dumps(spectra.columns.values.tolist())
-
-    html_code = html_template.substitute(
-        {"list": "".join(spectra_list),"cats": categories})
+    if categories[-1] == 'class':
+        html_code = html_template.substitute(
+            {"list": "".join(spectra_list), "cats": categories[:-1]})
+    else:
+        html_code = html_template.substitute(
+            {"list": "".join(spectra_list), "cats": categories})
     try:
         spectra.drop("class", axis=1).to_csv("spectra.txt", header=False, index=False, sep=",")
     except ValueError:
