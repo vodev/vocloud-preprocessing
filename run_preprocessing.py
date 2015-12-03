@@ -3,6 +3,8 @@ import json
 import string
 import base.data_handler as dh
 import os
+from astropy.io.votable.tree import VOTableFile, Resource, Table, Field
+
 __LINK_TEMPLATE = string.Template('<option selected id="${spectrum_name}_link">${spectrum_name}</option>\n')
 __script_dir = os.path.dirname(os.path.realpath(__file__))
 
@@ -37,6 +39,22 @@ def _generate_spectra(spectra):
     except ValueError:
         spectra.to_csv("spectra.txt", header=False, index=False, sep=",")
     return html_code
+
+def to_votable(data, file_name):
+    votable = VOTableFile()
+    resource = Resource()
+    votable.resources.append(resource)
+    table = Table(votable)
+    resource.tables.append(table)
+    columns = data.columns
+    if data.columns[-1] == 'class':
+        columns = columns[:-1]
+    fields = [Field(votable, name="placeholder", datatype="char", arraysize='*'),
+        Field(votable, name="intensities", datatype="double", arraysize='*')]
+    table.fields.extend(fields)
+    table.create_arrays(1)
+    table.array[0] = ("placeholder", columns.tolist())
+    votable.to_xml(file_name)
 
 def run_preprocessing(input_file):
     json_dict = None
@@ -79,8 +97,9 @@ def run_preprocessing(input_file):
             processed_df.drop(['class'], axis=1).to_csv("./som.csv", header=False, index=False, sep=" ")
         except KeyError:
             processed_df.to_csv("./som.csv", header=False, index=False, sep=" ")
-    processed_df.to_csv("./" + json_dict['out_file'], header=True, index=True, index_label='id')
-
+    processed_df.to_csv("./" + json_dict['out_file'], header=False, index=True, index_label='id')
+    to_votable(processed_df, 'meta.xml')
+    header = processed_df.columns
     html_code = _generate_spectra(processed_df)
     with open("./index.html", "w") as file:
         file.write(html_code)
